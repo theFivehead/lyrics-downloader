@@ -1,2 +1,4 @@
 # lyrics-downloader
-Dowloads lyrics based on singer name and safe them in wordlist
+Downloads all lyrics based on the singer's name and saves them in a wordlist
+## Usage:
+LyricsGen.py [name of singer]

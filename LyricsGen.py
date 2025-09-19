@@ -1,20 +1,28 @@
+import os
+import sys
 import time
 from bs4 import BeautifulSoup
 import requests
-from selenium.webdriver.chromium.service import ChromiumService
+#from selenium.webdriver.chromium.service import ChromiumService
 from selenium import webdriver
 from selenium.webdriver import Keys, ChromeOptions
 from selenium.webdriver.common.by import By
 
-service = ChromiumService("/usr/bin/chromedriver")
+#service = ChromiumService("/usr/bin/chromedriver")
 
-singer="adele"
-wordlist="wr.txt"
+
+
+if not len(sys.argv)-1>=1:
+    print("LyricsGen [name of singer]")
+    sys.exit()
+singer=sys.argv[1]
+
+wordlist=f"{singer} lyrics.txt"
 
 settings=ChromeOptions()
 settings.add_argument("--window-size=1920,1080")
-settings.add_argument("--headless")
-driver = webdriver.Chrome(options=settings,service=service)
+#settings.add_argument("--headless")
+driver = webdriver.Chrome(options=settings)
 
 driver.get("https://www.azlyrics.com/")
 
@@ -33,6 +41,10 @@ SongLinks=listOfSongs.find_all("a",href=lambda h: h and "/lyrics/"+singer+"/" in
 #closes driver because it is no longer needed
 driver.close()
 
+if os.path.exists(wordlist):
+  os.remove(wordlist)
+
+
 
 for link in SongLinks:
     URL = "https://www.azlyrics.com"+link["href"]
@@ -41,9 +53,8 @@ for link in SongLinks:
     lyrics=lyricsBS.find_all(
         lambda tag: tag.name == "div" and tag.get("class") is None and tag.get("id") is None)
     #removes unwanted text
-    lyricsParsed=str(lyrics[0]).replace("<br/>","").replace('</div>, <div><img alt="Adele - 19 album cover" class="album-image" src="/images/albums/677/e2973539e72f35e57ae2e3a684d62a64.jpg"/></div>',"").replace("</div>","").replace("<div>","").replace("<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->","")
-    #time.sleep(5)
+    lyricsParsed=str(lyrics[0]).replace("<br/>","").replace('</div>, <div><img alt="Adele - 19 album cover" class="album-image" src="/images/albums/677/e2973539e72f35e57ae2e3a684d62a64.jpg"/></div>',"").replace("</div>","").replace("<div>","").replace("<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->","").replace("<i>[Album version:]</i>","").replace("<i>[Live version:]</i>","")
+    time.sleep(4)
     print(lyricsParsed)
-
-    with open(wordlist,"w") as f:
+    with open(wordlist,"a") as f:
         f.write(lyricsParsed)
